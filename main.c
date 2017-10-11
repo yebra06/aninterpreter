@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         printf("\nshhh> ");
         cmd = (char*)malloc(BUFFER+1);
         getline(&cmd, &cmd_len, stdin);
-        printf("%scmd\n", cmd);
+        printf("%s\n", cmd);
 
         // Tokenize command.
         tokens = malloc(BUFFER * sizeof(char*));
@@ -45,6 +45,18 @@ int main(int argc, char** argv) {
             token = strtok(NULL, DELIM);
         }
         tokens[num_tokens] = NULL;
+
+        // Find where to redirect io if necessary and count pipes.
+        for (int i = 0; i < num_tokens; i++)
+            if (!strcmp(tokens[i], "|"))
+                num_pipes++;
+            else if (!strcmp(tokens[i], ">"))
+                output_pos = i+1;
+            else if (!strcmp(tokens[i], "<"))
+                input_pos = i+1;
+            else if (!strcmp(tokens[i], "exit"))
+                exit(0);
+
     }
 
     return 0;
