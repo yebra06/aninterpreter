@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #define BUFFER 1024
+#define DELIM " \n\t"
 
 int main(int argc, char** argv) {
     pid_t pid = 0;
@@ -35,6 +36,15 @@ int main(int argc, char** argv) {
         cmd = (char*)malloc(BUFFER+1);
         getline(&cmd, &cmd_len, stdin);
         printf("%scmd\n", cmd);
+
+        // Tokenize command.
+        tokens = malloc(BUFFER * sizeof(char*));
+        token = strtok(cmd, DELIM);
+        while (token != NULL) {
+            tokens[num_tokens++] = token;
+            token = strtok(NULL, DELIM);
+        }
+        tokens[num_tokens] = NULL;
     }
 
     return 0;
