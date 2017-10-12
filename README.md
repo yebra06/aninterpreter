@@ -1,17 +1,17 @@
 # aninterpreter
 Unix command line interpreter in development.
 
-# Environment
+## Environment
 - Developed on macOS Sierra 10.12.6
 - gcc -v Apple LLVM version 9.0.0 (clang-900.0.37)
 
-# Instructions
+## Instructions
 - Type `make` to build program.
 - Hit cntrl-c to exit.
 - `./run`
 - Type `make clean` to clean files.
 
-## Example
+### Example
 ```
 aninterpreter (master) $ make
 gcc -Wall -c main.c
