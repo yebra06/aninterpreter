@@ -2,6 +2,7 @@
 // Last updated: October 11, 2017
 
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,8 +14,8 @@
 int main(void) {
     pid_t pid = 0;
     int num_pipes = 0;
-    int output_pos = 0;
-    int input_pos = 0;
+    int output_redir = 0;
+    int input_redir = 0;
     int rfd[2] = {};
     int lfd[2] = {};
     char *cmd = NULL;
@@ -26,17 +27,19 @@ int main(void) {
     while (1) {
         pid = 0;
         num_pipes = 0;
-        output_pos = -1;
-        input_pos = -1;
+        output_redir = -1;
+        input_redir = -1;
         cmd_len = 0;
         num_tokens = 0;
 
         // Prompt and get command.
+        // Allocate 1.
         printf("\nshhh> ");
         cmd = (char*)malloc(BUFFER+1);
         getline(&cmd, &cmd_len, stdin);
 
         // Tokenize command.
+        // Allocate 2.
         tokens = malloc(BUFFER * sizeof(char*));
         token = strtok(cmd, DELIM);
         while (token != NULL) {
@@ -50,9 +53,9 @@ int main(void) {
             if (!strcmp(tokens[i], "|"))
                 num_pipes++;
             else if (!strcmp(tokens[i], ">"))
-                output_pos = i+1;
+                output_redir = i+1;
             else if (!strcmp(tokens[i], "<"))
-                input_pos = i+1;
+                input_redir = i+1;
             else if (!strcmp(tokens[i], "exit"))
                 exit(0);
 
@@ -71,6 +74,7 @@ int main(void) {
             argc = i > 0 ? end-start : end-start;
 
             // Find processes between '|'.
+            // Allocate 3.
             char *argv[argc];
             for (int j = start, c = 0; j < end; j++, c++) {
                 argv[c] = malloc(strlen(tokens[j])+1);
@@ -78,11 +82,29 @@ int main(void) {
             }
             argv[argc] = NULL;
 
-            if (num_pipes > 0 && i != num_pipes)
-                pipe(rfd);
+            // Assert pipe works.
+            if (num_pipes > 0 && i != 0) {
+                if (pipe(rfd) == -1) {
+                    perror("Error calling pipe().\nTerminating...");
+                    exit(-1);
+                }
+            }
 
+            // Exec shell processes.
             pid = fork();
-            if (pid > 0) {
+            if (pid == -1) {
+                // Error case.
+                perror("Error forking process.\nTerminating...");
+                exit(-1);
+            } else if (pid == 0) {
+                // Child process.
+                // TODO: Don't assume input redirection will always be first pipe process.
+                if (input_redir != -1 && i == 0) {
+                }
+                if (output_redir != -1 && i == num_pipes) {
+                }
+                execvp(argv[0], argv);
+            } else {
                 // Parent process.
                 if (i > 0) {
                     close(lfd[0]);
@@ -91,20 +113,17 @@ int main(void) {
                 lfd[0] = rfd[0];
                 lfd[1] = rfd[1];
                 wait(&pid);
-            } else {
-                // Child process.
-                execvp(argv[0], argv);
             }
 
+            // Free 3.
             for (int j = 0; j < argc; j++)
                 free(argv[j]);
         }
 
+        // Free 2, 1.
         free(tokens);
         free(cmd);
     }
-
-    return 0;
 }
 
 
