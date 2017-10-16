@@ -2,8 +2,8 @@
 # 10/11/2017
 
 all:
-	gcc -Wall -c main.c
+	gcc -Wall -c src/main.c
 	gcc -o run main.o
 
 clean:
-	rm *.o run
+	rm src/*.o run
