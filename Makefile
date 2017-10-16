@@ -6,4 +6,4 @@ all:
 	gcc -o run main.o
 
 clean:
-	rm src/*.o run
+	rm *.o run
