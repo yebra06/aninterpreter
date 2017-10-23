@@ -1,11 +1,12 @@
-// Programmer Alfredo Yebra Jr.
-// Last updated: October 16, 2017
+// Last updated: October 22, 2017
 
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define BUFFER 1024
@@ -103,7 +104,6 @@ int main(void) {
             // Spawn inner processes.
             pid_t pid = fork();
             if (pid == 0) {
-                // Input redirection.
                 if (input_pos != -1 && i == 0) {
                     if ((tmp_fd = open(tokens[input_pos], O_RDWR)) < 0) {
                         perror("Error input redirection.");
@@ -145,7 +145,6 @@ int main(void) {
                     dup(tmp_fd);
                     close(tmp_fd);
                 }
-
                 execvp(argv[0], argv);
             } else if (pid < 0) {
                 perror("Error forking.");
@@ -164,7 +163,7 @@ int main(void) {
             for (int j = 0; j < argc; j++)
                 free(argv[j]);
         }
-    } while (status != EOF);
+    } while (status != EOF && strcmp(cmd, "exit"));
 
     free(outfile);
     free(infile);

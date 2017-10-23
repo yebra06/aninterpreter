@@ -7,7 +7,7 @@ Unix command line interpreter in development.
 
 ## Instructions
 - Type `make` to build program.
-- Hit cntrl-c to exit.
+- Hit cntrl-c to exit or enter 'exit'.
 - `./run`
 - Type `make clean` to clean files.
 
